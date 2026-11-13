@@ -31,6 +31,54 @@
 
   const openOrder = id => { if (id && P.orderDetail) P.orderDetail(id); };
 
+  // ---- permission helpers -------------------------------------------------------------
+  async function permStatus() {
+    const ln = plug('LocalNotifications'), pn = P.pushEnabled && plug('PushNotifications');
+    if (!ln && !pn) return 'unsupported';
+    try {
+      const r = pn ? (await pn.checkPermissions()).receive : (await ln.checkPermissions()).display;
+      return r === 'granted' ? 'granted' : (r === 'denied' ? 'denied' : 'prompt');
+    } catch (e) { return 'unsupported'; }
+  }
+  async function registerPush() {
+    const pn = P.pushEnabled && plug('PushNotifications');
+    if (pn) await pn.register().catch(e => console.warn('push register failed', e));
+  }
+  async function makeChannel() {
+    const opts = { id: 'orders', name: 'Orders & alerts', description: 'New orders, payments and job updates', importance: 5, visibility: 1, vibration: true };
+    const ln = plug('LocalNotifications'), pn = plug('PushNotifications');
+    if (ln) await ln.createChannel(opts).catch(() => {});
+    if (pn && pn.createChannel) await pn.createChannel(opts).catch(() => {});
+  }
+  async function askPermission() {
+    const ln = plug('LocalNotifications'), pn = P.pushEnabled && plug('PushNotifications');
+    if (ln) await ln.requestPermissions().catch(() => {});
+    if (pn) await pn.requestPermissions().catch(() => {});
+    return permStatus();
+  }
+
+  // Banner shown while phone notifications are still switched off
+  let banner = null;
+  function hideBanner() { if (banner) { banner.remove(); banner = null; } }
+  async function showBanner() {
+    if (banner || !native) return;
+    const st = await permStatus();
+    if (st === 'granted') return;
+    banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;left:10px;right:10px;top:10px;z-index:400;background:#111;color:#fff;padding:12px 14px;border-radius:14px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);display:flex;gap:10px;align-items:center';
+    banner.innerHTML = '<span style="flex:1">🔔 Phone notifications are OFF. Turn them on to get alerts.</span><button style="background:#fff;color:#111;border:0;border-radius:10px;padding:8px 14px;font-weight:700">Turn on</button><button aria-label="Close" style="background:none;border:0;color:#fff;font-size:18px">✕</button>';
+    const [go, x] = banner.querySelectorAll('button');
+    x.onclick = hideBanner;
+    go.onclick = async () => {
+      const cur = await permStatus();
+      if (cur === 'unsupported') { alert('Please install the newest MJ\'s Printing app (download the latest APK from GitHub Releases), then open it again.'); return; }
+      const res = await askPermission();
+      if (res === 'granted') { hideBanner(); await registerPush(); P.toast && P.toast('Phone notifications are ON'); }
+      else alert('Notifications are still off.\n\nOpen your phone Settings → Apps → MJ\'s Printing → Notifications → turn on "Allow notifications".\nThen come back to this app.');
+    };
+    document.body.appendChild(banner);
+  }
+
   P.initPush = async function () {
     if (P._pushInit) return; P._pushInit = true;
     try {
@@ -40,11 +88,9 @@
         return;
       }
       const ln = plug('LocalNotifications'), pn = plug('PushNotifications');
-      if (ln) {
-        await ln.requestPermissions().catch(() => {});
-        await ln.createChannel({ id: 'orders', name: 'Orders & alerts', description: 'New orders, payments and job updates', importance: 5, visibility: 1, vibration: true }).catch(() => {});
-        ln.addListener('localNotificationActionPerformed', ev => openOrder(ev && ev.notification && ev.notification.extra && ev.notification.extra.order_id));
-      }
+      // Create the channel FIRST so Android lists the app under notification settings
+      await makeChannel();
+      if (ln) ln.addListener('localNotificationActionPerformed', ev => openOrder(ev && ev.notification && ev.notification.extra && ev.notification.extra.order_id));
       if (P.pushEnabled && pn) {
         pn.addListener('registration', t => {
           P.sb.rpc('register_device_token', { p_token: t.value }).then(r => {
@@ -61,11 +107,16 @@
         });
         // User tapped a push
         pn.addListener('pushNotificationActionPerformed', a => openOrder(a && a.notification && a.notification.data && a.notification.data.order_id));
-        let perm = await pn.checkPermissions();
-        if (perm.receive === 'prompt' || perm.receive === 'prompt-with-rationale') perm = await pn.requestPermissions();
-        if (perm.receive === 'granted') await pn.register();
       }
-    } catch (e) { console.warn('push init failed', e); }
+      let st = await permStatus();
+      if (st === 'prompt') st = await askPermission();
+      if (st === 'granted') await registerPush(); else showBanner();
+      // Coming back from phone Settings after turning notifications on
+      document.addEventListener('visibilitychange', async () => {
+        if (document.hidden) return;
+        if ((await permStatus()) === 'granted') { hideBanner(); registerPush(); } else showBanner();
+      });
+    } catch (e) { console.warn('push init failed', e); showBanner(); }
   };
 
   // Stop sending this phone's pushes to the previous user (called on sign out)
