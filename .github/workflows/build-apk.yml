@@ -20,6 +20,7 @@ jobs:
         working-directory: android-app
     env:
       SITE_URL: ${{ inputs.site_url || vars.SITE_URL }}
+      GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +33,21 @@ jobs:
         run: node make-config.js
       - name: Create Android project
         run: npx cap add android
+      - name: Allow notifications (Android 13+)
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          grep -q POST_NOTIFICATIONS "$M" || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />\n</manifest>#' "$M"
+      - name: Add Firebase config (phone push)
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            case "$GOOGLE_SERVICES_JSON" in
+              \{*) printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json ;;
+              *) printf '%s' "$GOOGLE_SERVICES_JSON" | base64 -d > android/app/google-services.json ;;
+            esac
+            echo "Firebase config added - push notifications ON"
+          else
+            echo "No GOOGLE_SERVICES_JSON secret - push notifications OFF (app still alerts while open)"
+          fi
       - name: Apply MJ's Printing icons
         run: cp -r android-res/* android/app/src/main/res/
       - name: Sync

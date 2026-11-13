@@ -8,7 +8,7 @@
     staff: ['jobs', 'account'],
     customer: ['neworder', 'myorders', 'pricelist', 'mypayments', 'account']
   };
-  P.signOut = async () => { await P.sb.auth.signOut(); location.href = '/pages/login.html'; };
+  P.signOut = async () => { if (P.pushLogout) await P.pushLogout(); await P.sb.auth.signOut(); location.href = '/pages/login.html'; };
 
   P.boot = async function (portal) {
     try { await P.ready; } catch (e) { document.body.innerHTML = `<div class="fatal">${P.esc(e.message)}</div>`; return; }

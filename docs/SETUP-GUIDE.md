@@ -64,6 +64,39 @@ Replace `assets/images/business-logo.png` with your own file (keep the name), or
 - Inventory → Usage rules: map services to materials if you want automatic stock deduction on completion.
 - Place a test order as a customer, approve it as Cashier/Admin, assign Staff, take a payment, print the receipt.
 
+## 9. Phone notifications (Android app) — free
+Your Android app can ring the phone for every new notification (new online order, payment, ready for pickup, low stock…) **even when the app is closed**. This uses Google Firebase (free). Do this once.
+
+**A. Create the Firebase project**
+1. Go to https://console.firebase.google.com → **Add project** → name it (e.g. `mjs-printing`). Google Analytics can be turned off.
+2. In the project, click the **Android icon** (Add app). Android package name: **`com.mjsprinting.app`** (must be exactly this). Click **Register app**.
+3. Click **Download google-services.json**, then Next/Continue until done.
+
+**B. Give GitHub the app file**
+1. Open the downloaded `google-services.json` in Notepad and copy everything.
+2. In your GitHub repo: **Settings → Secrets and variables → Actions → Secrets → New repository secret**.
+3. Name: `GOOGLE_SERVICES_JSON` — Value: paste the file contents — **Add secret**.
+
+**C. Give Netlify the sending key**
+1. Firebase → ⚙ **Project settings → Service accounts → Generate new private key** → download the JSON file.
+2. Netlify → **Site configuration → Environment variables** → add:
+   - `FCM_SERVICE_ACCOUNT` = the full contents of that JSON file
+   - `PUSH_WEBHOOK_SECRET` = any long random text (e.g. 30 random letters/numbers). Remember it for step D.
+3. **Deploys → Trigger deploy** so the new variables and the new function go live.
+
+**D. Connect the database**
+1. Open `supabase/push.sql`. Edit the two lines marked `<<< EDIT ME`: your Netlify address, and the same `PUSH_WEBHOOK_SECRET` text.
+2. Supabase → **SQL Editor** → paste the whole file → **Run**.
+
+**E. Rebuild the APK** (GitHub → Actions → Build Android APK → Run workflow). In the log, the step "Add Firebase config" should say *push notifications ON*.
+
+**F. On each phone**: install the new APK (uninstall the old one first if it refuses), sign in, and tap **Allow** when asked to send notifications. Done — place a test order from a customer account and the admin/cashier phones should ring.
+
+Notes
+- Each person gets the notifications meant for their role (e.g. admins and cashiers get new orders; customers get updates about their own orders). Signing out stops notifications on that phone.
+- If you skip this section the app still shows a phone notification while it is open, but cannot wake a closed app.
+- Troubleshooting: Netlify → Functions → `send-push` → logs. "Unauthorized" = the secret in `push.sql` and Netlify don't match. Phone silent but function says `sent: 0` = nobody has signed in on a phone with the new APK yet.
+
 ## How the main business rules work
 - **Pricing** is computed in the database (`calc_line`). The browser preview and the server use the same function, so totals can't be tampered with.
 - **Prices per item**: unit price × (pages × copies) + service extra charge − quantity discount + rush fee. For per-piece items use 1 page and enter the quantity as copies.
