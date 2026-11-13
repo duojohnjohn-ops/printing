@@ -16,9 +16,11 @@ create table if not exists public.profiles (
   role text not null default 'customer' check (role in ('admin','cashier','staff','customer')),
   phone text,
   active boolean not null default true,
+  is_owner boolean not null default false,   -- exactly one owner; set only by claim_owner()
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+create unique index if not exists uq_single_owner on public.profiles ((is_owner)) where is_owner;
 
 create table if not exists public.customers (
   id uuid primary key default gen_random_uuid(),
@@ -275,13 +277,17 @@ end $$;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created after insert on auth.users for each row execute function public.handle_new_user();
 
--- Only admins (or the service role / SQL editor) can change role or active flag
+-- Only admins (or the service role / SQL editor) can change role or active flag.
+-- Nobody signed in through the app can ever change the owner flag, and the owner cannot be demoted or deactivated.
 create or replace function public.guard_profile_update() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
-  if auth.uid() is not null and coalesce(public.app_role(),'') <> 'admin'
-     and (new.role <> old.role or new.active <> old.active or new.id <> old.id) then
-    raise exception 'Not allowed to change role or status';
+  if auth.uid() is not null then
+    if new.is_owner is distinct from old.is_owner then raise exception 'The owner flag cannot be changed'; end if;
+    if old.is_owner and (new.role <> 'admin' or new.active = false) then raise exception 'The owner account cannot be demoted or deactivated'; end if;
+    if coalesce(public.app_role(),'') <> 'admin' and (new.role <> old.role or new.active <> old.active or new.id <> old.id) then
+      raise exception 'Not allowed to change role or status';
+    end if;
   end if;
   return new;
 end $$;
@@ -310,6 +316,37 @@ begin
   select value into pref from public.business_settings where key = 'order_prefix';
   return coalesce(nullif(pref,''),'ORD') || '-' || to_char(now() at time zone 'Asia/Manila','YYMMDD') || '-' || lpad(nextval('public.order_seq')::text, 4, '0');
 end $$;
+
+-- ---------------------------------------------------------------------
+-- Owner-first setup
+-- ---------------------------------------------------------------------
+-- Public check used by the login page to decide between "Set up owner" and "Sign in".
+create or replace function public.owner_exists() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles where is_owner)
+$$;
+revoke execute on function public.owner_exists() from public;
+grant execute on function public.owner_exists() to anon, authenticated, service_role;
+
+-- Atomically promotes the first account to owner/admin. Service role only (called by the setup-owner function).
+create or replace function public.claim_owner(p_user uuid, p_name text, p_phone text) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  perform pg_advisory_xact_lock(727001);
+  if exists (select 1 from public.profiles where is_owner) then
+    raise exception 'The owner account has already been set up';
+  end if;
+  update public.profiles
+     set role = 'admin', is_owner = true, active = true,
+         full_name = coalesce(nullif(trim(p_name),''), full_name), phone = nullif(trim(p_phone),'')
+   where id = p_user;
+  if not found then raise exception 'User profile not found'; end if;
+  delete from public.customers where user_id = p_user;  -- the owner is staff, not a customer
+  insert into public.activity_logs(user_id, action, entity, entity_id, details)
+  values (p_user, 'owner_setup', 'user', p_user, null);
+end $$;
+revoke execute on function public.claim_owner(uuid,text,text) from public, anon, authenticated;
+grant execute on function public.claim_owner(uuid,text,text) to service_role;
 
 -- ---------------------------------------------------------------------
 -- Pricing (single source of truth; used by the UI preview AND order creation)

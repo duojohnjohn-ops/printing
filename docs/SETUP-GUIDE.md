@@ -11,7 +11,8 @@ Follow these steps in order. Total time: about 20 minutes.
 
 ## 2. Run the SQL files (SQL Editor → New query)
 Run each file's full contents, in this order:
-1. `supabase/schema.sql` — tables, indexes, triggers, pricing/payment/inventory functions
+0. `supabase/00_reset.sql` — **only if an older version is already installed.** It deletes the old PSMS tables, functions, triggers and sequences (and all their data) so the new schema starts clean. Skip it on a brand-new project. Back up first if the old data matters. Read the note at the bottom of that file about old login accounts.
+1. `supabase/schema.sql` — tables, indexes, triggers, pricing/payment/inventory functions, owner-setup functions
 2. `supabase/policies.sql` — Row Level Security and private storage buckets
 3. `supabase/seed.sql` — sample services, **sample** prices (PHP), expense categories, inventory, settings
 
@@ -23,14 +24,13 @@ Edit prices afterwards in **Admin → Pricing** — nothing is hardcoded in the 
 - **Site URL**: your Netlify URL (e.g. `https://your-shop.netlify.app`) — needed for password-reset links. Add `http://localhost:8888` for local testing.
 - Optional: turn off "Confirm email" while testing so new customers can sign in immediately.
 
-## 4. Create the first administrator
-1. Deploy/run the site (steps 5–6) and open `/pages/login.html` → **Create account** with your own email.
-2. In Supabase **SQL Editor** run (use your email):
-   ```sql
-   update public.profiles set role = 'admin' where email = 'you@example.com';
-   ```
-3. Sign in again — you land in the Admin portal. Create Cashier and Printing Staff accounts under **Users → Add staff user**.
-   (Customers register themselves; staff accounts can only be created by an admin.)
+## 4. Set up the owner account (first visit)
+No SQL needed. Until an owner exists, the login page shows only **Set up the owner account** (customer sign-up and sign-in are hidden).
+1. Deploy/run the site (steps 5–6) and open `/pages/login.html`.
+2. Enter the business name, your name, email and a password, then **Create owner account**. You are signed in straight to the Admin portal.
+3. Add Cashier and Printing Staff accounts under **Users → Add staff user**. Customers can now register themselves.
+
+The setup works only once: after the owner exists, the function refuses any further attempt. The owner account cannot be demoted or deactivated. If you ever need to start over, run `00_reset.sql` again.
 
 ## 5. Run locally in VS Code
 ```bash
@@ -83,6 +83,8 @@ Replace `assets/images/business-logo.png` with your own file (keep the name), or
 | Symptom | Fix |
 |---|---|
 | "Could not load configuration" | Environment variables missing in Netlify / `.env` |
+| Login page says the database is not set up | Run the SQL files in order (step 2) and reload |
+| Owner setup says "already registered" | Old login accounts survived the reset — delete them in Authentication → Users |
 | Login works but page bounces back to login | Profile row missing/inactive — check `profiles` table |
 | "No price is configured for the selected options" | Add a matching row in Admin → Pricing |
 | Dashboard errors | Re-run `schema.sql` (functions are `create or replace`; safe to re-run) |

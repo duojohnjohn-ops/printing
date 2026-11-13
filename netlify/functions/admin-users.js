@@ -28,6 +28,8 @@ exports.handler = handler(['admin'], async ({ db, user, body }) => {
     if (body.active !== undefined) patch.active = !!body.active;
     if (body.full_name !== undefined) patch.full_name = str(body.full_name, 120);
     if (id === user.id && ((patch.role && patch.role !== 'admin') || patch.active === false)) throw httpError(400, 'You cannot demote or deactivate your own account');
+    const { data: target } = await db.from('profiles').select('is_owner').eq('id', id).single();
+    if (target && target.is_owner && ((patch.role && patch.role !== 'admin') || patch.active === false)) throw httpError(400, 'The owner account cannot be demoted or deactivated');
     const { error } = await db.from('profiles').update(patch).eq('id', id);
     if (error) throw httpError(400, 'Could not update user');
     if (patch.active !== undefined) await db.auth.admin.updateUserById(id, { ban_duration: patch.active ? 'none' : '876000h' });
