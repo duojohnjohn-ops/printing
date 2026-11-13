@@ -78,7 +78,7 @@ insert into public.inventory (name, category, unit, quantity, min_stock, unit_co
 on conflict (name) do nothing;
 
 insert into public.business_settings (key, value) values
- ('business_name','My Printing Shop'),('business_address','Your address here'),('business_phone',''),
+ ('business_name','MJ''s Printing'),('business_address','Your address here'),('business_phone',''),
  ('business_email',''),('business_hours','Mon-Sat 8:00 AM - 6:00 PM'),('order_prefix','PSMS'),
  ('receipt_footer','Thank you for your business!'),('currency','PHP')
 on conflict (key) do nothing;

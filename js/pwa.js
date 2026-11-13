@@ -15,7 +15,7 @@
   if (ios && !localStorage.getItem('psms_ios_hint')) {
     document.addEventListener('DOMContentLoaded', () => {
       const h = document.createElement('div');
-      h.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:150;background:#0f1729;color:#fff;padding:12px 14px;border-radius:14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.35)';
+      h.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:150;background:#111111;color:#fff;padding:12px 14px;border-radius:14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.35)';
       h.innerHTML = 'Install this app: tap <b>Share</b> then <b>Add to Home Screen</b>. <button style="float:right;background:none;border:0;color:#fff;font-size:16px" aria-label="Close">✕</button>';
       h.querySelector('button').onclick = () => { try { localStorage.setItem('psms_ios_hint', '1'); } catch (e) {} h.remove(); };
       document.body.appendChild(h);
