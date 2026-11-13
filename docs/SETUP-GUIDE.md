@@ -89,3 +89,12 @@ Replace `assets/images/business-logo.png` with your own file (keep the name), or
 | "No price is configured for the selected options" | Add a matching row in Admin → Pricing |
 | Dashboard errors | Re-run `schema.sql` (functions are `create or replace`; safe to re-run) |
 | Password reset link goes to wrong site | Fix Site URL in Supabase Auth settings |
+
+## 8. Android app (APK) from GitHub — free
+1. Upload this whole project to a GitHub repository (the `.github` folder must be included).
+2. Deploy the site on Netlify first and copy its address (e.g. `https://your-shop.netlify.app`).
+3. In GitHub open **Actions → Build Android APK → Run workflow**, paste your Netlify address, and run. (Or save it once under **Settings → Secrets and variables → Actions → Variables** as `SITE_URL`.)
+4. After about 5–10 minutes open **Releases** — download `MJs-Printing.apk` and share that link with your staff and customers.
+5. On the phone: open the APK, allow "Install unknown apps" when asked, then Install.
+
+The app opens your live site, so website updates reach the app automatically — you only rebuild the APK to change the app icon or name. The APK is debug-signed (fine for sideloading); publishing on Google Play needs a signed release build.
