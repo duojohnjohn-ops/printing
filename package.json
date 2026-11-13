@@ -1,0 +1,10 @@
+{
+  "name": "printing-shop-management",
+  "version": "1.0.0",
+  "description": "Printing Shop Management System (Netlify + Supabase)",
+  "private": true,
+  "scripts": { "dev": "netlify dev", "check": "node --check netlify/functions/*.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "@supabase/supabase-js": "^2.45.4" },
+  "devDependencies": { "netlify-cli": "^17.0.0" }
+}

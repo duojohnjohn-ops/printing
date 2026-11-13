@@ -1,0 +1,13 @@
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.stat{background:#fff;border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+.stat small{color:var(--muted);display:block;margin-bottom:4px}.stat strong{font-size:22px}
+.stat.warn{border-left-color:var(--accent)}.stat.bad{border-left-color:var(--err)}.stat.good{border-left-color:var(--ok)}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:18px}
+.charts canvas{max-height:260px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:18px}
+.pos{display:grid;grid-template-columns:1fr 360px;gap:18px;align-items:start}
+.pos-side{position:sticky;top:76px}
+.cres{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.cres button{padding:4px 10px;border:1px solid var(--line);background:#fff;border-radius:999px;cursor:pointer;font:inherit}
+.cres button:hover{border-color:var(--brand)}.csel{margin-top:6px;font-weight:600}
+.calc{background:var(--brand-light);border-radius:8px;padding:10px 12px;margin:12px 0;min-height:40px}
+.price-card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:14px;background:#fff}
