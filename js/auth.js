@@ -18,6 +18,9 @@
     <form id="f-up" class="form hidden"><p class="muted small">Customer accounts only. Staff accounts are created by the administrator.</p><div class="fld"><label>Full name</label><input class="inp" name="full_name" required maxlength="120"></div><div class="fld"><label>Phone</label><input class="inp" name="phone" maxlength="40"></div><div class="fld"><label>Email</label><input class="inp" type="email" name="email" required></div><div class="fld"><label>Password (min. 8 characters)</label><input class="inp" type="password" name="password" minlength="8" required autocomplete="new-password"></div><button class="btn primary block" type="submit">Create account</button></form>
     <form id="f-new" class="form hidden"><h3>Set a new password</h3><div class="fld"><input class="inp" type="password" name="password" minlength="8" required placeholder="New password" autocomplete="new-password"></div><button class="btn primary block" type="submit">Update password</button></form></div></div></div>`;
     const msg = (t, type) => { root.querySelector('#msg').innerHTML = t ? `<div class="${type === 'ok' ? 'banner ok' : 'error'}" style="margin-bottom:12px">${P.esc(t)}</div>` : ''; };
+    const hp = new URLSearchParams(location.hash.replace(/^#/, ''));
+    if (hp.get('error_code') === 'otp_expired') { history.replaceState(null, '', location.pathname); msg('That email link has expired or was already used. Sign in if you already confirmed your account, or use “Forgot password?” to get a new link.'); }
+    else if (hp.get('error')) { history.replaceState(null, '', location.pathname); msg('That email link is not valid. Please request a new one.'); }
     if (new URLSearchParams(location.search).get('e') === 'inactive') msg('This account is inactive. Please contact the administrator.');
     root.querySelectorAll('.tabs button').forEach(b => b.onclick = () => {
       root.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('on', x === b)); msg('');
@@ -49,7 +52,7 @@
     };
     root.querySelector('#f-up').onsubmit = async e => {
       e.preventDefault(); const f = P.formData(e.target); const btn = e.target.querySelector('button'); btn.disabled = true; msg('');
-      const { data, error } = await P.sb.auth.signUp({ email: f.email.trim(), password: f.password, options: { data: { full_name: f.full_name.trim(), phone: f.phone.trim() } } });
+      const { data, error } = await P.sb.auth.signUp({ email: f.email.trim(), password: f.password, options: { emailRedirectTo: location.origin + '/pages/login.html', data: { full_name: f.full_name.trim(), phone: f.phone.trim() } } });
       btn.disabled = false;
       if (error) { msg(error.message); return; }
       if (data.session) await go(); else msg('Account created. Check your email to confirm it, then sign in.', 'ok');
