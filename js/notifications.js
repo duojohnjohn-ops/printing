@@ -3,13 +3,13 @@
   P.mountBell = function (el) {
     el.innerHTML = '<button class="icon-btn" aria-label="Notifications">🔔</button><span class="cnt hidden">0</span><div class="npanel hidden"></div>';
     const cnt = el.querySelector('.cnt'), panel = el.querySelector('.npanel'); let items = []; const seen = new Set(); let first = true;
-    async function load() {
+    async function load(quiet) {
       const { data, error } = await P.sb.from('notifications').select('*').order('created_at', { ascending: false }).limit(30);
       if (error) return;
       items = data || [];
       // Alert on the phone for anything new (the Android push covers this when the app is closed)
       if (first) { items.forEach(i => seen.add(i.id)); first = false; }
-      else items.slice().reverse().forEach(i => { if (seen.has(i.id)) return; seen.add(i.id); if (!i.read && !P.pushEnabled && P.notifyPhone) P.notifyPhone({ id: i.id, title: i.title, message: i.message, order_id: i.order_id }); });
+      else items.slice().reverse().forEach(i => { if (seen.has(i.id)) return; seen.add(i.id); if (!i.read && !quiet && !(P.pushEnabled && document.hidden) && P.notifyPhone) P.notifyPhone({ id: i.id, title: i.title, message: i.message, order_id: i.order_id }); });
       const n = items.filter(i => !i.read).length;
       cnt.textContent = n > 99 ? '99+' : n; cnt.classList.toggle('hidden', !n);
       if (!panel.classList.contains('hidden')) draw();
@@ -27,9 +27,9 @@
     }
     el.querySelector('button').onclick = e => { e.stopPropagation(); panel.classList.toggle('hidden'); if (!panel.classList.contains('hidden')) draw(); };
     document.addEventListener('click', e => { if (!el.contains(e.target)) panel.classList.add('hidden'); });
-    load(); setInterval(load, 15000);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) load(); });
-    P.refreshBell = load;
+    load(); setInterval(() => load(), 15000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) load(P.pushEnabled); });
+    P.refreshBell = () => load();
     if (P.initPush) P.initPush();
   };
 })();

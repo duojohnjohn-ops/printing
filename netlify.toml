@@ -5,6 +5,9 @@
 [functions]
   node_bundler = "esbuild"
 
+[functions."alerts-cron"]
+  schedule = "*/5 * * * *"
+
 [dev]
   publish = "."
 

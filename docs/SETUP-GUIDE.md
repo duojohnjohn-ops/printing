@@ -97,6 +97,13 @@ Notes
 - If you skip this section the app still shows a phone notification while it is open, but cannot wake a closed app.
 - Troubleshooting: Netlify → Functions → `send-push` → logs. "Unauthorized" = the secret in `push.sql` and Netlify don't match. Phone silent but function says `sent: 0` = nobody has signed in on a phone with the new APK yet.
 
+## 10. Notification update (customer updates + automatic admin alerts)
+1. Supabase → **SQL Editor** → paste all of `supabase/notifications_update.sql` → **Run**. (Fresh installs already include it in `schema.sql`.)
+2. Upload the project to GitHub so Netlify redeploys. The new `alerts-cron` function then runs every 5 minutes by itself (Netlify → Functions → `alerts-cron` shows it as *Scheduled*).
+3. Result: customers are notified at every step of their order and on payments; admins/cashiers are notified of delayed orders, low stock and unpaid balances within about 5 minutes (only between 8 AM and 9 PM), without opening the Dashboard. New orders and payments are still notified instantly.
+4. Customers only get notifications if they placed the order while logged in (walk-in customers without an account have no phone to notify).
+5. Some phones (OPPO/Realme/Xiaomi/Vivo) stop background apps. On each phone set the app's **Battery → Unrestricted / Allow background activity** and turn on **Auto-start**, otherwise alerts can arrive late when the app is closed.
+
 ## How the main business rules work
 - **Pricing** is computed in the database (`calc_line`). The browser preview and the server use the same function, so totals can't be tampered with.
 - **Prices per item**: unit price × (pages × copies) + service extra charge − quantity discount + rush fee. For per-piece items use 1 page and enter the quantity as copies.

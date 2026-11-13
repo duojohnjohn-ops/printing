@@ -130,5 +130,5 @@
     options(); drawCart();
   }
   P.register('pos', { title: 'Point of Sale', icon: '🛒', render: el => orderForm(el, 'pos') });
-  P.register('neworder', { title: 'New Order', icon: '➕', render: el => orderForm(el, 'customer') });
+  P.orderUpload = { MIME, MAX, uploadFiles }; // used by the simple customer order page (customer-order.js)
 })();

@@ -73,3 +73,24 @@
 .npanel{position:absolute;right:0;top:42px;width:350px;max-height:70vh;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow-lg);z-index:60}
 .npanel .it{padding:12px 16px;border-bottom:1px solid var(--line);cursor:pointer}.npanel .it.unread{background:var(--brand-light)}.npanel .it b{display:block}
 .npanel .hd{display:flex;justify-content:space-between;padding:12px 16px;font-weight:700;border-bottom:1px solid var(--line)}
+
+/* Simple customer order page */
+.simple-order{max-width:680px;margin:0 auto}
+.simple-order .so-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.simple-order .so-grid .full{grid-column:1/-1}
+.simple-order .drop{display:flex;flex-direction:column;align-items:center;gap:4px;padding:26px 16px;border:2px dashed #b9c0d2;border-radius:var(--radius);text-align:center;cursor:pointer;background:#fff}
+.simple-order .drop:hover{border-color:var(--ink)}
+.simple-order .drop input{position:absolute;opacity:0;width:1px;height:1px}
+.simple-order .drop .big{font-size:34px}
+.simple-order .flist{margin-top:10px}
+.simple-order .fitem{display:flex;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:10px;margin-top:6px;font-size:14px}
+.simple-order .fitem span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.simple-order .big-chk{font-size:16px;font-weight:600;padding:12px;border:1px solid var(--line);border-radius:12px}
+.simple-order .big-chk input{width:20px;height:20px;margin-right:8px}
+.simple-order .so-total{background:var(--ink);color:#fff;border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+.simple-order .so-lab{opacity:.8;font-size:14px}
+.simple-order .so-amt{font-size:36px;font-weight:800;line-height:1.2}
+.simple-order .so-det{opacity:.85;font-size:13px;margin-top:4px}
+.simple-order .so-err{color:#ffb4b4}
+.simple-order .btn.lg{padding:14px 18px;font-size:17px}
+@media(max-width:520px){.simple-order .so-grid{grid-template-columns:1fr}}
