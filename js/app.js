@@ -3,7 +3,7 @@
   P.register = (id, def) => { P.modules[id] = def; };
   P.charts = [];
   const NAV = {
-    admin: ['dashboard', 'pos', 'orders', 'customers', 'services', 'pricing', 'inventory', 'payments', 'expenses', 'employees', 'reports', 'settings', 'users', 'logs', 'account'],
+    admin: ['dashboard', 'pos', 'orders', 'customers', 'offers', 'pricing', 'inventory', 'payments', 'expenses', 'employees', 'reports', 'settings', 'users', 'logs', 'account'],
     cashier: ['pos', 'orders', 'customers', 'payments', 'pricelist', 'account'],
     staff: ['jobs', 'account'],
     customer: ['neworder', 'myorders', 'pricelist', 'mypayments', 'account']

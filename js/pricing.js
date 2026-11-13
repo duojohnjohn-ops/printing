@@ -2,11 +2,11 @@
   const P = window.PSMS;
   const COLOR = { any: 'Any', bw: 'Black & White', color: 'Colored' }, SIDED = { any: 'Any', single: 'Single-sided', double: 'Double-sided' };
   P.register('pricing', {
-    title: 'Pricing', icon: '💲',
+    title: 'Discounts & Pricing', icon: '💲',
     async render(el) {
       const services = P.ck(await P.sb.from('services').select('id,name').order('name'));
       if (!services.length) { el.innerHTML = P.empty('Add a service first.'); return; }
-      el.innerHTML = `<div class="toolbar"><h2>Pricing Management</h2><div class="tools"><select class="inp" id="svsel">${services.map(s => `<option value="${s.id}">${P.esc(s.name)}</option>`).join('')}</select></div></div><div id="pr"></div><div id="qd" style="margin-top:20px"></div>`;
+      el.innerHTML = `<div class="toolbar"><h2>Discounts & Pricing</h2><div class="tools"><select class="inp" id="svsel">${services.map(s => `<option value="${s.id}">${P.esc(s.name)}</option>`).join('')}</select></div></div><div id="pr"></div><div id="qd" style="margin-top:20px"></div>`;
       const sel = el.querySelector('#svsel'); let prApi;
       const PF = [{ name: 'paper_size', label: 'Paper size', help: 'Leave blank = applies to any size' }, { name: 'paper_type', label: 'Paper type', help: 'Leave blank = any type' },
         { name: 'color_mode', label: 'Color', type: 'select', required: true, options: [{ v: 'any', l: 'Any' }, { v: 'bw', l: 'Black & White' }, { v: 'color', l: 'Colored' }] },
@@ -44,10 +44,10 @@
     title: 'Services & Prices', icon: '💲',
     async render(el) {
       const c = await P.catalog(true);
-      el.innerHTML = `<div class="toolbar"><h2>Available Services & Prices</h2></div>` + (c.services.map(s => {
-        const rows = c.pricing.filter(p => p.service_id === s.id), disc = c.discounts.filter(d => !d.service_id || d.service_id === s.id);
-        return `<div class="price-card"><h3>${P.esc(s.name)}</h3><p class="muted">${P.esc(s.description || '')}</p>${rows.length ? `<table class="tbl"><thead><tr><th>Size</th><th>Type</th><th>Color</th><th>Sides</th><th class="r">Price</th></tr></thead><tbody>${rows.map(r => `<tr><td>${P.esc(r.paper_size || '—')}</td><td>${P.esc(r.paper_type || '—')}</td><td>${COLOR[r.color_mode]}</td><td>${SIDED[r.sided]}</td><td class="r">${P.money(r.unit_price)}</td></tr>`).join('')}</tbody></table>` : '<p class="muted">Price on request.</p>'}<p class="small muted">Turnaround ~${s.turnaround_days} day(s)${+s.rush_fee_percent ? ` · Rush +${s.rush_fee_percent}%` : ''}${+s.additional_charge ? ` · ${P.esc(s.additional_charge_label || 'Extra charge')} ${P.money(s.additional_charge)}` : ''}${disc.length ? ' · Volume discounts: ' + disc.sort((a, b) => a.min_qty - b.min_qty).map(d => `${d.min_qty}+ → ${d.discount_percent}%`).join(', ') : ''}</p></div>`;
-      }).join('') || P.empty('No services available.'));
+      el.innerHTML = `<div class="toolbar"><h2>Available Services & Prices</h2></div>` + (c.services.length ? `<div class="offer-grid">${c.services.map(s => {
+        const rows = c.pricing.filter(p => p.service_id === s.id), disc = c.discounts.filter(d => !d.service_id || d.service_id === s.id), low = rows.length ? Math.min(...rows.map(r => +r.unit_price)) : null;
+        return `<div class="offer"><div class="offer-top">${s.category ? `<span class="chip">${P.esc(s.category)}</span>` : '<span></span>'}</div><h3>${P.esc(s.name)}</h3>${s.description ? `<p class="muted small">${P.esc(s.description)}</p>` : ''}<div class="offer-price">${low == null ? '<b>Price on request</b>' : `from <b>${P.money(low)}</b>`}</div>${rows.length ? `<ul class="opts">${rows.map(r => `<li><span>${P.esc([r.paper_size, r.paper_type, COLOR[r.color_mode], SIDED[r.sided]].filter(Boolean).join(' · '))}</span><b>${P.money(r.unit_price)}</b></li>`).join('')}</ul>` : ''}<div class="offer-foot small muted">Turnaround ~${s.turnaround_days} day(s)${+s.rush_fee_percent ? ` · Rush +${s.rush_fee_percent}%` : ''}${+s.additional_charge ? ` · ${P.esc(s.additional_charge_label || 'Extra charge')} ${P.money(s.additional_charge)}` : ''}${disc.length ? ' · Volume discounts: ' + disc.sort((a, b) => a.min_qty - b.min_qty).map(d => `${d.min_qty}+ → ${d.discount_percent}%`).join(', ') : ''}</div></div>`;
+      }).join('')}</div>` : P.empty('No services available.'));
     }
   });
 })();

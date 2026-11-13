@@ -1,16 +1,21 @@
-/* ===== Design tokens: edit these to match your business logo colours ===== */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+/* ===== Design tokens: change these to match your logo ===== */
 :root{
-  --brand:#1e4f9c; --brand-dark:#143a75; --brand-light:#e8f0fc;
-  --accent:#e8710a; --accent-light:#fff1e2;
-  --ok:#1a8f4c; --warn:#b7791f; --err:#c53030;
-  --bg:#f4f6fa; --card:#ffffff; --text:#1c2433; --muted:#6b7589; --line:#e2e7f0;
-  --radius:10px; --shadow:0 1px 3px rgba(20,40,80,.08),0 4px 14px rgba(20,40,80,.05);
-  --font:'Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  --brand:#2f5bea; --brand-dark:#1d3fb8; --brand-light:#eaf0ff;
+  --accent:#ff7a1a; --accent-light:#fff0e3;
+  --cyan:#00b4d8; --magenta:#e6399b; --yellow:#ffc933; --ink:#0f1729;
+  --ok:#139a57; --warn:#b7791f; --err:#d6336c;
+  --bg:#f3f5fb; --card:#ffffff; --text:#172033; --muted:#6a7488; --line:#e5e9f2;
+  --radius:14px; --radius-sm:10px;
+  --shadow:0 1px 2px rgba(15,23,41,.05),0 8px 24px rgba(15,23,41,.06);
+  --shadow-lg:0 24px 60px rgba(15,23,41,.28);
+  --font:'Plus Jakarta Sans','Segoe UI',system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  --cmyk:linear-gradient(90deg,var(--cyan) 0 25%,var(--magenta) 25% 50%,var(--yellow) 50% 75%,var(--ink) 75% 100%);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
-body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14.5px;line-height:1.45}
-h1,h2,h3{margin:0;line-height:1.2}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14.5px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;line-height:1.2;letter-spacing:-.01em}
 a{color:var(--brand)}
 .hidden{display:none!important}
 .muted{color:var(--muted)} .small{font-size:12.5px} .r{text-align:right} .full{grid-column:1/-1}
@@ -18,30 +23,33 @@ a{color:var(--brand)}
 
 /* App shell */
 #app{display:flex;min-height:100vh}
-.sidebar{width:248px;background:var(--brand-dark);color:#dbe6fa;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:30;transition:transform .2s}
-.brand{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.12);font-weight:700;color:#fff}
-.brand img{height:38px;max-width:60px;object-fit:contain;background:#fff;border-radius:6px;padding:2px}
-.sidebar nav{flex:1;overflow:auto;padding:10px}
-.sidebar nav a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:#dbe6fa;text-decoration:none;margin-bottom:2px}
-.sidebar nav a:hover{background:rgba(255,255,255,.08)}
-.sidebar nav a.active{background:var(--accent);color:#fff;font-weight:600}
+.sidebar{width:256px;background:var(--ink);color:#c5cee3;display:flex;flex-direction:column;position:fixed;inset:0 auto 0 0;z-index:30;transition:transform .2s;border-top:4px solid transparent;border-image:var(--cmyk) 1}
+.brand{display:flex;align-items:center;gap:12px;padding:18px 18px 16px;font-weight:800;font-size:15px;color:#fff;letter-spacing:-.01em}
+.brand img{height:40px;max-width:60px;object-fit:contain;background:#fff;border-radius:10px;padding:3px}
+.sidebar nav{flex:1;overflow:auto;padding:6px 12px}
+.sidebar nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#c5cee3;text-decoration:none;margin-bottom:3px;font-weight:500;transition:.15s}
+.sidebar nav a:hover{background:rgba(255,255,255,.07);color:#fff}
+.sidebar nav a.active{background:linear-gradient(135deg,var(--brand),#5b7cff);color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(47,91,234,.4)}
 .ic{width:22px;text-align:center}
-.side-foot{padding:12px}
-.main{flex:1;margin-left:248px;min-width:0;display:flex;flex-direction:column}
-.topbar{display:flex;align-items:center;gap:12px;padding:12px 24px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
-.topbar h1{font-size:19px;flex:1}
+.side-foot{padding:14px}
+.main{flex:1;margin-left:256px;min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;gap:12px;padding:14px 28px;background:rgba(255,255,255,.85);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.topbar h1{font-size:20px;font-weight:800;flex:1}
 .top-r{display:flex;align-items:center;gap:16px}
-.who{display:flex;flex-direction:column;text-align:right;line-height:1.2}.who small{color:var(--muted);text-transform:capitalize}
-.view{padding:24px;max-width:1500px;width:100%}
+.who{display:flex;flex-direction:column;text-align:right;line-height:1.25}.who strong{font-weight:700}.who small{color:var(--muted);text-transform:capitalize}
+.view{padding:28px;max-width:1500px;width:100%}
 .menu{display:none}
 
 /* Login */
-.login-wrap{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
-.login-brand{background:linear-gradient(145deg,var(--brand-dark),var(--brand));color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center;gap:16px}
-.login-brand img{max-height:130px;max-width:260px;background:#fff;border-radius:14px;padding:10px;object-fit:contain}
-.login-brand h1{font-size:30px}
-.login-card{display:flex;align-items:center;justify-content:center;padding:32px}
-.login-card .box{width:100%;max-width:400px}
-.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px}
-.tabs button{background:none;border:0;padding:10px 14px;cursor:pointer;font:inherit;color:var(--muted);border-bottom:2px solid transparent}
-.tabs button.on{color:var(--brand);border-color:var(--accent);font-weight:600}
+.login-wrap{min-height:100vh;display:grid;grid-template-columns:1.05fr 1fr}
+.login-brand{position:relative;overflow:hidden;background:radial-gradient(circle at 15% 15%,#4a6cf2 0,transparent 45%),radial-gradient(circle at 90% 90%,#e6399b55 0,transparent 40%),linear-gradient(150deg,var(--ink),#1b2a63);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px;text-align:center;gap:14px}
+.login-brand::before{content:"";position:absolute;top:0;left:0;right:0;height:6px;background:var(--cmyk)}
+.login-brand img{max-height:120px;max-width:240px;background:#fff;border-radius:20px;padding:12px;object-fit:contain;box-shadow:0 18px 40px rgba(0,0,0,.3)}
+.login-brand h1{font-size:32px;font-weight:800}
+.login-brand p{margin:0;opacity:.8}
+.login-card{display:flex;align-items:center;justify-content:center;padding:32px;background:var(--bg)}
+.login-card .box{width:100%;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:var(--shadow)}
+.login-card h3{font-size:20px;font-weight:800}
+.tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:18px}
+.tabs button{flex:1;background:none;border:0;padding:9px 14px;cursor:pointer;font:inherit;font-weight:600;color:var(--muted);border-radius:9px}
+.tabs button.on{background:#fff;color:var(--brand);box-shadow:0 1px 4px rgba(15,23,41,.12)}
