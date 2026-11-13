@@ -52,17 +52,13 @@
     };
     root.querySelector('#f-up').onsubmit = async e => {
       e.preventDefault(); const f = P.formData(e.target); const btn = e.target.querySelector('button'); btn.disabled = true; msg('');
-      const { data, error } = await P.sb.auth.signUp({ email: f.email.trim(), password: f.password, options: { emailRedirectTo: location.origin + '/pages/login.html', data: { full_name: f.full_name.trim(), phone: f.phone.trim() } } });
-      btn.disabled = false;
-      if (error) { msg(error.message); return; }
-      if (data.session) await go(); else msg('Account created. Check your email to confirm it, then sign in.', 'ok');
+      try { await P.api('register', { full_name: f.full_name, phone: f.phone, email: f.email, password: f.password }); }
+      catch (err) { msg(err.message); btn.disabled = false; return; }
+      const { error } = await P.sb.auth.signInWithPassword({ email: f.email.trim(), password: f.password });
+      if (error) { msg('Account created. Please sign in.', 'ok'); btn.disabled = false; return; }
+      if (!(await go())) btn.disabled = false;
     };
-    root.querySelector('#forgot').onclick = async e => {
-      e.preventDefault(); const email = root.querySelector('#f-in [name=email]').value.trim();
-      if (!email) { msg('Type your email above first.'); return; }
-      await P.sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + '/pages/login.html' });
-      msg('If that email exists, a reset link has been sent.', 'ok');
-    };
+    root.querySelector('#forgot').onclick = e => { e.preventDefault(); msg('Forgot your password? Please ask the shop owner or admin to reset it for you.', 'ok'); };
     root.querySelector('#f-new').onsubmit = async e => {
       e.preventDefault(); const { error } = await P.sb.auth.updateUser({ password: P.formData(e.target).password });
       if (error) { msg(error.message); return; } await go();

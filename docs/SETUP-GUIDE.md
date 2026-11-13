@@ -22,7 +22,7 @@ Edit prices afterwards in **Admin → Pricing** — nothing is hardcoded in the 
 ## 3. Authentication settings (Authentication → Providers/URL Configuration)
 - **Email** provider enabled.
 - **Site URL** (important — otherwise email links open `localhost:3000` and fail): your Netlify URL (e.g. `https://your-shop.netlify.app`) — needed for password-reset links. Under **Redirect URLs** add `https://your-shop.netlify.app/**` and `http://localhost:8888/**` (this app runs on port 8888, not 3000). Email links are single-use and expire after about an hour.
-- Optional: turn off "Confirm email" while testing so new customers can sign in immediately.
+- No email setup is needed: customers register through the app (accounts are created already confirmed, no verification email), and the owner resets forgotten passwords under **Users → Reset password**. Email links (Site URL / SMTP) are no longer used.
 
 ## 4. Set up the owner account (first visit)
 No SQL needed. Until an owner exists, the login page shows only **Set up the owner account** (customer sign-up and sign-in are hidden).
